@@ -21,40 +21,40 @@
     *
     */
     var $table;
-    var $select 		= array();
-    var $joins 			= array();
-    var $columns 		= array();
-    var $where 			= array();
-    var $add_columns	= array();
-    var $edit_columns 	= array();
-    var $unset_columns 	= array();
+    var $select         = array();
+    var $joins          = array();
+    var $columns        = array();
+    var $where          = array();
+    var $add_columns    = array();
+    var $edit_columns   = array();
+    var $unset_columns  = array();
 
     /**
     * Load ActiveRecord functions
     *
     */
-	public function __construct() 
-	{
-		$this->ar = new ActiveRecords;
-	}
+    public function __construct() 
+    {
+      $this->ar = new ActiveRecords;
+    }
 
     /**
     * Database settings
     *
     */
-	public function connect($config) 
-	{
-	  $this->ar->connect($config);
-	}
+    public function connect($config) 
+    {
+      $this->ar->connect($config);
+    }
 
     /**
     * Get input data (post or get)
     *
     */
-	public function input($field) 
-	{
-		return mysql_real_escape_string((isset($_POST['sEcho']))? $_POST[$field] : $_GET[$field]) ;
-	}
+    public function input($field) 
+    {
+      return mysql_real_escape_string((isset($_POST['sEcho']))? $_POST[$field] : $_GET[$field]) ;
+    }
 
     /**
     * Generates the SELECT portion of the query
@@ -72,7 +72,7 @@
         $this->select[$column] =  trim(preg_replace('/(.*)\s+as\s+(\w*)/i', '$1', $val));
       }
       $this->ar->select($this->explode(',', $columns), $backtick_protect);
-	  
+      
       return $this;
     }
 
@@ -301,7 +301,7 @@
         $this->ar->where($val[0], $val[1], $val[2]);
 
       return $this->ar->count_all_results($this->table);
-	}
+    }
 
     /**
     * Runs callback functions and makes replacements
@@ -352,10 +352,10 @@
     * @return string $retval
     */
     protected function balanceChars($str, $open, $close) {
-        $openCount = substr_count($str, $open);
-        $closeCount = substr_count($str, $close);
-        $retval = $openCount - $closeCount;
-        return $retval;
+      $openCount = substr_count($str, $open);
+      $closeCount = substr_count($str, $close);
+      $retval = $openCount - $closeCount;
+      return $retval;
     }
 
     /**
@@ -368,23 +368,23 @@
     * @return mixed $retval
     */
     protected function explode($delimiter, $str, $open='(', $close=')') {
-        $retval = array();
-        $hold = array();
-        $balance = 0;
-        $parts = explode($delimiter, $str);
-        foreach ($parts as $part) {
-            $hold[] = $part;
-            $balance += $this->balanceChars($part, $open, $close);
-            if ($balance < 1) {
-                $retval[] = implode($delimiter, $hold);
-                $hold = array();
-                $balance = 0;
-           }
+      $retval = array();
+      $hold = array();
+      $balance = 0;
+      $parts = explode($delimiter, $str);
+      foreach ($parts as $part) {
+        $hold[] = $part;
+        $balance += $this->balanceChars($part, $open, $close);
+        if ($balance < 1) {
+          $retval[] = implode($delimiter, $hold);
+          $hold = array();
+          $balance = 0;
         }
-        if (count($hold) > 0) {
-            $retval[] = implode($delimiter, $hold);
-        }
-        return $retval;
+      }
+      if (count($hold) > 0) {
+        $retval[] = implode($delimiter, $hold);
+      }
+      return $retval;
     }
 
   }

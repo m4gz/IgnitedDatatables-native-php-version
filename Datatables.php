@@ -30,9 +30,9 @@
     * Load ActiveRecord functions
     *
     */
-    public function __construct($ar_type = 'mysql') 
+    public function __construct($driver = 'mysql') 
     {
-      include('ActiveRecords/'. $ar_type .'.php');
+      include('ActiveRecords/'. $driver .'.php');
       $this->ar = new ActiveRecords;
     }
 

@@ -150,8 +150,7 @@
     function order_by($orderby, $direction = '')
     {
       $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE)) ? ' '.$direction : ' ASC';
-      $orderby_statement = $orderby.$direction;
-      $this->ar_orderby[] = $orderby_statement;
+      $this->ar_orderby[] = $orderby.$direction;
       return $this;
     }
 
@@ -214,10 +213,7 @@
       }
 
       if (is_numeric($this->ar_limit))
-      {
-        $sql .= "\n";
-        $sql .= "LIMIT ".(($this->ar_offset == 0)? '' : $this->ar_offset.', ').$this->ar_limit;
-      }
+        $sql .= "\nLIMIT ".(($this->ar_offset == 0)? '' : $this->ar_offset.', ').$this->ar_limit;
 
       return $sql;
     }

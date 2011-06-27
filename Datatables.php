@@ -2,10 +2,8 @@
   /**
   * Ignited Datatables
   *
-  * This is a wrapper class/library based on the native Datatables server-side implementation by Allan Jardine
-  * found at http://datatables.net/examples/data_sources/server_side.html for CodeIgniter
+  * This is a wrapper class/library for Datatables (table plug-in for Jquery)
   *
-  * @package    CodeIgniter
   * @subpackage libraries
   * @category   library
   * @version    0.5.2 ( Vanilla PHP Version )
@@ -13,7 +11,6 @@
   *             Yusuf Ozdemir <yusuf@ozdemir.be>
   * @link       http://codeigniter.com/forums/viewthread/160896/
   */
-  require_once('ActiveRecords.php');
   class Datatables
   {
     /**
@@ -22,8 +19,8 @@
     */
     var $table;
     var $select         = array();
-    var $joins          = array();
     var $columns        = array();
+    var $joins          = array();
     var $where          = array();
     var $add_columns    = array();
     var $edit_columns   = array();
@@ -33,8 +30,9 @@
     * Load ActiveRecord functions
     *
     */
-    public function __construct() 
+    public function __construct($ar_type = 'mysql') 
     {
+      include('ActiveRecords/'. $ar_type .'.php');
       $this->ar = new ActiveRecords;
     }
 

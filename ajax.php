@@ -1,6 +1,6 @@
 <?php 
 require_once('Datatables.php');
-$datatables = new Datatables;
+$datatables = new Datatables();
 
 // MYSQL configuration
 $config = array(

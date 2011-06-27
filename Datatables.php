@@ -110,10 +110,10 @@
     * @param bool $backtick_protect
     * @return string
     */
-    public function where($key_condition, $val = NULL, $backtick_protect = TRUE)
+    public function where($key_condition)
     {
-      $this->where[] = array($key_condition, $val, $backtick_protect);
-      $this->ar->where($key_condition, $val, $backtick_protect);
+      $this->where[] = array($key_condition);
+      $this->ar->where($key_condition);
       return $this;
     }
 
@@ -208,7 +208,7 @@
     protected function get_filtering()
     {
       $sWhere = '';
-      $sSearch = mysql_real_escape_string($this->input('sSearch'));
+      $sSearch = $this->input('sSearch');
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
       $sColArray = ($this->input('sColumns'))? explode(',', $this->input('sColumns')) : $columns;
 
@@ -220,7 +220,7 @@
       $sWhere = substr_replace($sWhere, '', -3);
 
       if($sWhere != '')
-        $this->ar->where('(' . $sWhere .')');
+        $this->ar->where('(' . $sWhere . ')');
     }
 
     /**
@@ -296,7 +296,7 @@
         $this->ar->join($val[0], $val[1], $val[2]);
 
       foreach($this->where as $val)
-        $this->ar->where($val[0], $val[1], $val[2]);
+        $this->ar->where($val[0]);
 
       return $this->ar->count_all_results($this->table);
     }

@@ -97,17 +97,12 @@
 
     /**
     * WHERE
-    *
+    * // TODO : Backtick protection
     */
-    function where($key, $value = NULL, $type = 'AND ', $escape = TRUE)
+    function where($key, $value = NULL, $escape = FALSE, $type = 'AND ')
     {
-      if (!is_array($key))
-        $key = array($key => $value);
-      foreach ($key as $k => $v)
-      {
-        $prefix = (count($this->ar_where) == 0) ? '' : $type;
-        $this->ar_where[] = $prefix.$k.$v;
-      }
+      $prefix = (count($this->ar_where) == 0) ? '' : $type;
+      $this->ar_where[] = $prefix.$key;
       return $this;
     }
 
@@ -151,7 +146,7 @@
     function get()
     {
       $aData = array();
-      $result = mysqli_query( $this->db, $this->_compile_select()) or die(mysqli_error());
+      $result = mysqli_query( $this->db, $this->_compile_select()) or die(mysqli_error($this->db));
       $this->_reset_select();
       while ( $aRow = mysqli_fetch_row($result) )
         $aData[] = $aRow;
@@ -167,7 +162,7 @@
       if ($table != '')
         $this->from($table);
       $sql = $this->_compile_select($this->_count_string . 'numrows');
-      $query = mysqli_query($this->db, $sql) or die(mysqli_error());
+      $query = mysqli_query($this->db, $sql) or die(mysqli_error($this->db));
       $this->_reset_select();
       $row = $query->fetch_object();
       return (int) $row->numrows;

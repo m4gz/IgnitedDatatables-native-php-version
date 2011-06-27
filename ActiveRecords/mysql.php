@@ -107,17 +107,12 @@
 
     /**
     * WHERE
-    *
+    * // TODO : Backtick protection
     */
-    function where($key, $value = NULL, $type = 'AND ', $escape = TRUE)
+    function where($key, $value = NULL, $escape = FALSE, $type = 'AND ')
     {
-      if (!is_array($key))
-        $key = array($key => $value);
-      foreach ($key as $k => $v)
-      {
-        $prefix = (count($this->ar_where) == 0) ? '' : $type;
-        $this->ar_where[] = $prefix.$k.$v;
-      }
+      $prefix = (count($this->ar_where) == 0) ? '' : $type;
+      $this->ar_where[] = $prefix.$key;
       return $this;
     }
 
@@ -203,7 +198,7 @@
         $sql .= "\n".implode("\n", $this->ar_join);
 
       if (count($this->ar_where) > 0)
-        $sql .= "\nWHERE " . implode("\n", $this->ar_where);
+        $sql .= "\nWHERE " . implode(" ", $this->ar_where);
 
       if (count($this->ar_orderby) > 0)// check
       {

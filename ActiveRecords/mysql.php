@@ -63,7 +63,7 @@
     function db_select()
     {
       @mysql_select_db( $this->database, $this->db ) or 
-        die( 'Could not select database '. $this->database );        
+        die( 'Could not select database ' . $this->database );        
     }
 
     /**
@@ -111,7 +111,7 @@
     */
     function where($key, $value = NULL, $escape = FALSE, $type = 'AND ')
     {
-      $prefix = (count($this->ar_where) == 0) ? '' : $type;
+      $prefix = (count($this->ar_where) == 0)? '' : $type;
       $this->ar_where[] = $prefix.$key;
       return $this;
     }
@@ -144,7 +144,7 @@
     */
     function order_by($orderby, $direction = '')
     {
-      $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE)) ? ' '.$direction : ' ASC';
+      $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE))? ' '.$direction : ' ASC';
       $this->ar_orderby[] = $orderby.$direction;
       return $this;
     }
@@ -173,13 +173,9 @@
         $this->from($table);
       $sql = $this->_compile_select($this->_count_string . 'numrows');
       $query = mysql_query($sql) or die(mysql_error());
-
-      if (mysql_num_rows($query) == 0)
-        return 0;
-
       $this->_reset_select();
-      $row = mysql_fetch_array($query);
-      return (int) $row['numrows'];
+      $row = mysql_fetch_object($query);
+      return (int) $row->numrows;
     }
 
     /**
@@ -188,7 +184,7 @@
     */
     function _compile_select($q = NULL)
     {
-      $sql  = ($q == NULL) ? 'SELECT ' : $q ;
+      $sql  = ($q == NULL)? 'SELECT ' : $q ;
       $sql .= implode(',', $this->ar_select);
 
       if(count($this->ar_from) > 0) 
@@ -198,13 +194,13 @@
         $sql .= "\n".implode("\n", $this->ar_join);
 
       if (count($this->ar_where) > 0)
-        $sql .= "\nWHERE " . implode(" ", $this->ar_where);
+        $sql .= "\nWHERE " . implode("\n", $this->ar_where);
 
       if (count($this->ar_orderby) > 0)// check
       {
         $sql .= "\nORDER BY " . implode(', ', $this->ar_orderby);
         if ($this->ar_order !== FALSE)
-          $sql .= ($this->ar_order == 'desc') ? ' DESC' : ' ASC';
+          $sql .= ($this->ar_order == 'desc')? ' DESC' : ' ASC';
       }
 
       if (is_numeric($this->ar_limit))

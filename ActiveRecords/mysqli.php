@@ -101,7 +101,7 @@
     */
     function where($key, $value = NULL, $escape = FALSE, $type = 'AND ')
     {
-      $prefix = (count($this->ar_where) == 0) ? '' : $type;
+      $prefix = (count($this->ar_where) == 0)? '' : $type;
       $this->ar_where[] = $prefix.$key;
       return $this;
     }
@@ -134,8 +134,8 @@
     */
     function order_by($orderby, $direction = '')
     {
-      $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE)) ? ' '.$direction : ' ASC';
-      $this->ar_orderby[] =  $orderby.$direction;
+      $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE))? ' '.$direction : ' ASC';
+      $this->ar_orderby[] = $orderby.$direction;
       return $this;
     }
 
@@ -146,7 +146,7 @@
     function get()
     {
       $aData = array();
-      $result = mysqli_query( $this->db, $this->_compile_select()) or die(mysqli_error($this->db));
+      $result = mysqli_query($this->db, $this->_compile_select()) or die(mysqli_error($this->db));
       $this->_reset_select();
       while ( $aRow = mysqli_fetch_row($result) )
         $aData[] = $aRow;
@@ -174,7 +174,7 @@
     */
     function _compile_select($q = NULL)
     {
-      $sql  = ($q == NULL) ? 'SELECT ' : $q ;
+      $sql  = ($q == NULL)? 'SELECT ' : $q ;
       $sql .= implode(',', $this->ar_select);
 
       if(count($this->ar_from) > 0) 
@@ -190,7 +190,7 @@
       {
         $sql .= "\nORDER BY " . implode(', ', $this->ar_orderby);
         if ($this->ar_order !== FALSE)
-          $sql .= ($this->ar_order == 'desc') ? ' DESC' : ' ASC';
+          $sql .= ($this->ar_order == 'desc')? ' DESC' : ' ASC';
       }
 
       if (is_numeric($this->ar_limit))

@@ -110,10 +110,10 @@
     * @param bool $backtick_protect
     * @return string
     */
-    public function where($key_condition)
+    public function where($key_condition, $val = NULL, $backtick_protect = TRUE)
     {
-      $this->where[] = array($key_condition);
-      $this->ar->where($key_condition);
+      $this->where[] = array($key_condition, $val, $backtick_protect);
+      $this->ar->where($key_condition, $val, $backtick_protect);
       return $this;
     }
 
@@ -296,7 +296,7 @@
         $this->ar->join($val[0], $val[1], $val[2]);
 
       foreach($this->where as $val)
-        $this->ar->where($val[0]);
+        $this->ar->where($val[0], $val[1], $val[2]);
 
       return $this->ar->count_all_results($this->table);
     }

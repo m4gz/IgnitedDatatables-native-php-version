@@ -60,10 +60,10 @@
     * SELECT
     *
     */
-    function select($columns, $backtick_protect)
+    function select($columns, $backtick_protect = TRUE)
     {
       foreach ($columns as $column)
-        $this->ar_select[] = trim($column);
+        $this->ar_select[] = ($backtick_protect == TRUE)? $this->_protect_identifiers(trim($column)) : trim($column);
       return $this;
     }
 
@@ -75,7 +75,7 @@
     {
       $from = explode(',', $from);
       foreach ((array)$from as $f)
-        $this->ar_from[] = $this->_escape_char . trim($f) . $this->_escape_char;
+        $this->ar_from[] =  $this->_protect_identifiers(trim($f));
       return $this;    
     }
 
@@ -90,19 +90,25 @@
         $type = strtoupper(trim($type));
         $type = (!in_array($type, array('LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER')))? '':$type.' ' ;
       }
-      $join = $type.'JOIN '.$table.' ON '.$cond;
+      $join = $type.'JOIN '.$this->_protect_identifiers($table).' ON '.$this->_protect_identifiers($cond);
       $this->ar_join[] = $join;
       return $this;
     }
 
     /**
     * WHERE
-    * // TODO : Backtick protection
+    *
     */
-    function where($key, $value = NULL, $escape = FALSE, $type = 'AND ')
+    function where($key, $value = NULL, $escape = TRUE, $type = 'AND ')
     {
       $prefix = (count($this->ar_where) == 0)? '' : $type;
-      $this->ar_where[] = $prefix.$key;
+      if($value != NULL) 
+      {
+        $key = ($this->_has_operator($key) == TRUE)? $key : $key.' ='; 
+        $value = ($escape == TRUE)? "'".$value."'" : $value;  
+      }
+
+      $this->ar_where[] = $prefix.(($escape == TRUE)? $this->_protect_identifiers($key.$value) : $key.$value);
       return $this;
     }
 
@@ -197,6 +203,51 @@
         $sql .= "\nLIMIT ".(($this->ar_offset == 0)? '' : $this->ar_offset.', ').$this->ar_limit;
 
       return $sql;
+    }
+
+    /**
+    * Protect identifiers
+    *
+    */
+    function _protect_identifiers($text) {
+      $_escape_char   = '`';
+      $_replace = '';
+      $_replace2 = '';
+      $_pattern = '/\b(?<!\"|\')(\w+)(?<!\"|\')[\=]?\b/i';
+      $text = str_replace('=', ' = ', $text);
+      $text = preg_replace('/\s\s+/', ' ', $text);
+
+      if(strpos($text, '(') !== false) 
+        return $text;
+
+      if(strpos($text, ' as ') !== false ) 
+      {
+        $_replace = substr(strrev(strstr(strrev($text), strrev(' as '))), 0, -strlen(' as '));
+        $_replace2 = strstr( $text,' as ');
+      }
+      else
+      {
+        $_replace = $text;
+        $_replace2 = '';
+      }
+      return preg_replace($_pattern , $this->_escape('$1'), $_replace).$_replace2;
+    }
+
+    /**
+    * Test Operator
+    *
+    */
+    function _has_operator($str)
+    {
+      return (!preg_match("/(\s|<|>|!|=|is null|is not null)/i", trim($str)))? FALSE : TRUE;
+    }
+
+    /**
+    * Escape
+    *
+    */
+    function _escape($text) {
+      return $this->_escape_char . $text . $this->_escape_char ;
     }
 
     /**

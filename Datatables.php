@@ -6,7 +6,7 @@
   *
   * @subpackage libraries
   * @category   library
-  * @version    0.5.2 ( Vanilla PHP Version )
+  * @version    0.5.3 ( Vanilla PHP Version )
   * @author     Vincent Bambico <metal.conspiracy@gmail.com>
   *             Yusuf Ozdemir <yusuf@ozdemir.be>
   * @link       http://codeigniter.com/forums/viewthread/160896/
@@ -193,7 +193,13 @@
     */
     protected function get_ordering()
     {
-      $sColArray = ($this->input('sColumns'))? explode(',', $this->input('sColumns')) : $this->columns;
+      if ($this->check_mDataprop())
+        $sColArray = $this->get_mDataprop();
+      elseif ($this->input('sColumns'))
+        $sColArray = explode(',', $this->input('sColumns'));
+      else
+        $sColArray = $this->columns;
+
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
       for($i = 0; $i < intval($this->input('iSortingCols')); $i++)
         if(isset($sColArray[intval($this->input('iSortCol_' . $i))]) && in_array($sColArray[intval($this->input('iSortCol_' . $i))], $columns ))
@@ -210,7 +216,13 @@
       $sWhere = '';
       $sSearch = $this->input('sSearch');
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
-      $sColArray = ($this->input('sColumns'))? explode(',', $this->input('sColumns')) : $columns;
+
+      if ($this->check_mDataprop())
+        $sColArray = $this->get_mDataprop();
+      elseif ($this->input('sColumns'))
+        $sColArray = explode(',', $this->input('sColumns'));
+      else
+        $sColArray = $this->columns;
 
       if($sSearch != '')
         for($i = 0; $i < count($sColArray); $i++)
@@ -248,19 +260,27 @@
       foreach($rResult as $row_key => $row_val)
       {
         foreach($row_val as $field => $val)
-          $aaData[$row_key][] = $val;
+          if ($this->check_mDataprop())
+            $aaData[$row_key][$field] = $val;
+          else
+            $aaData[$row_key][] = $val;
 
         foreach($this->add_columns as $add_val)
-          $aaData[$row_key][] = $this->exec_replace($add_val, $aaData[$row_key]);
+          if ($this->check_mDataprop())
+            $aaData[$row_key][$field] = $this->exec_replace($add_val, $aaData[$row_key]);
+          else
+            $aaData[$row_key][] = $this->exec_replace($add_val, $aaData[$row_key]);
 
         foreach($this->edit_columns as $modkey => $modval)
           foreach($modval as $val)
-            $aaData[$row_key][array_search($modkey, $this->columns)] = $this->exec_replace($val, $aaData[$row_key]);
+            $aaData[$row_key][($this->check_mDataprop())?$modkey:array_search($modkey, $this->columns)] = $this->exec_replace($val, $aaData[$row_key]);
 
         foreach($this->unset_columns as $column)
           if (in_array($column, $this->columns))
-            unset($aaData[$row_key][array_search($column, $this->columns)]);
-        $aaData[$row_key] = array_values($aaData[$row_key]);
+            unset($aaData[$row_key][($this->check_mDataprop())?$column:array_search($column, $this->columns)]);
+
+        if (!$this->check_mDataprop())
+          $aaData[$row_key] = array_values($aaData[$row_key]);
       }
 
       $sColumns = $this->columns;
@@ -325,12 +345,12 @@
 
             foreach($args as $args_key => $args_val)
               if(in_array($args_val, $this->columns))
-                $args[$args_key] = $row_data[array_search($args_val, $this->columns)];
+                $args[$args_key] = $row_data[($this->check_mDataprop())?$args_val:array_search($args_val, $this->columns)];
 
             $replace_string = call_user_func_array($func, $args);
           }
           elseif(in_array($val, $this->columns))
-            $replace_string = $row_data[array_search($val, $this->columns)];
+            $replace_string = $row_data[($this->check_mDataprop())? $val:array_search($val, $this->columns)];
           else
             $replace_string = $val;
 
@@ -341,6 +361,31 @@
       return $custom_val['content'];
     }
 
+    /**
+    * Check mDataprop
+    *
+    * @return bool
+    */
+    protected function check_mDataprop()
+    {
+      for($i = 0; $i < intval($this->input('iColumns')); $i++)
+        if(!is_numeric($this->input('mDataProp_' . $i)))
+          return TRUE;
+      return FALSE;
+    }
+
+    /**
+    * Get mDataprop order
+    *
+    * @return mixed
+    */
+    protected function get_mDataprop()
+    {
+      $mDataProp = array();
+      for($i = 0; $i < intval($this->input('iColumns')); $i++)
+        $mDataProp[] = $this->input('mDataProp_' . $i);
+      return $mDataProp;
+    }
     /**
     * Return the difference of open and close characters
     *

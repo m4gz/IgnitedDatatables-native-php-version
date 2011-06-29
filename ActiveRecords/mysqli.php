@@ -75,7 +75,7 @@
     {
       $from = explode(',', $from);
       foreach ((array)$from as $f)
-        $this->ar_from[] =  $this->_protect_identifiers(trim($f));
+        $this->ar_from[] = $this->_protect_identifiers(trim($f));
       return $this;    
     }
 

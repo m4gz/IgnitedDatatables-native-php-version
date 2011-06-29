@@ -51,7 +51,12 @@
     */
     public function input($field) 
     {
-      return mysql_real_escape_string((isset($_POST['sEcho']))? $_POST[$field] : $_GET[$field]) ;
+      if(isset($_POST['sEcho']) && isset($_POST[$field]))
+        return mysql_real_escape_string($_POST[$field]);
+      elseif(isset($_GET['sEcho']) && isset($_GET[$field]))
+        return mysql_real_escape_string($_GET[$field]);
+      else
+        return FALSE ;
     }
 
     /**
@@ -368,6 +373,7 @@
     */
     protected function check_mDataprop()
     {
+      if ($this->input('mDataProp_0') === false) return FALSE;
       for($i = 0; $i < intval($this->input('iColumns')); $i++)
         if(!is_numeric($this->input('mDataProp_' . $i)))
           return TRUE;

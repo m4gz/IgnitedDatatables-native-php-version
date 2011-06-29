@@ -36,7 +36,7 @@
     * Construct function
     *
     */
-    function connect($config)
+    public function connect($config)
     {
       foreach ($config as $key => $val)
         if(in_array($key, array('hostname', 'username', 'password', 'database', 'port')))
@@ -48,7 +48,7 @@
     * DB connection
     *
     */
-    function db_connect()
+    protected function db_connect()
     {
       if ($this->port != '')
         $this->db = @mysqli_connect($this->hostname, $this->username, $this->password, $this->database, $this->port);
@@ -60,7 +60,7 @@
     * SELECT
     *
     */
-    function select($columns, $backtick_protect = TRUE)
+    public function select($columns, $backtick_protect = TRUE)
     {
       foreach ($columns as $column)
         $this->ar_select[] = ($backtick_protect == TRUE)? $this->_protect_identifiers(trim($column)) : trim($column);
@@ -71,7 +71,7 @@
     * FROM
     *
     */
-    function from($from)
+    public function from($from)
     {
       $from = explode(',', $from);
       foreach ((array)$from as $f)
@@ -83,7 +83,7 @@
     * JOIN
     *
     */
-    function join($table, $cond, $type = '')
+    public function join($table, $cond, $type = '')
     {
       if ($type != '')
       {
@@ -99,7 +99,7 @@
     * WHERE
     *
     */
-    function where($key, $value = NULL, $escape = TRUE, $type = 'AND ')
+    public function where($key, $value = NULL, $escape = TRUE, $type = 'AND ')
     {
       $prefix = (count($this->ar_where) == 0)? '' : $type;
       if($value != NULL) 
@@ -116,7 +116,7 @@
     * LIMIT
     *
     */
-    function limit($value, $offset = '')
+    public function limit($value, $offset = '')
     {
       $this->ar_limit = $value;
       if ($offset != '')
@@ -125,20 +125,10 @@
     }
 
     /**
-    * Offset
-    *
-    */
-    function offset($offset)
-    {
-      $this->ar_offset = $offset;
-      return $this;
-    }
-
-    /**
     * ORDERBY
     *
     */
-    function order_by($orderby, $direction = '')
+    public function order_by($orderby, $direction = '')
     {
       $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE))? ' '.$direction : ' ASC';
       $this->ar_orderby[] = $orderby.$direction;
@@ -149,7 +139,7 @@
     * Run Query
     *
     */
-    function get()
+    public function get()
     {
       $aData = array();
       $result = mysqli_query($this->db, $this->_compile_select()) or die(mysqli_error($this->db));
@@ -163,7 +153,7 @@
     * Count Results
     *
     */
-    function count_all_results($table = '')
+    public function count_all_results($table = '')
     {    
       if ($table != '')
         $this->from($table);
@@ -178,7 +168,7 @@
     * Compile sql string
     *
     */
-    function _compile_select($q = NULL)
+    protected function _compile_select($q = NULL)
     {
       $sql  = ($q == NULL)? 'SELECT ' : $q ;
       $sql .= implode(',', $this->ar_select);
@@ -209,7 +199,7 @@
     * Protect identifiers
     *
     */
-    function _protect_identifiers($text) {
+    protected function _protect_identifiers($text) {
       $_escape_char   = '`';
       $_replace = '';
       $_replace2 = '';
@@ -237,7 +227,7 @@
     * Test Operator
     *
     */
-    function _has_operator($str)
+    protected function _has_operator($str)
     {
       return (!preg_match("/(\s|<|>|!|=|is null|is not null)/i", trim($str)))? FALSE : TRUE;
     }
@@ -246,7 +236,7 @@
     * Escape
     *
     */
-    function _escape($text) {
+    protected function _escape($text) {
       return $this->_escape_char . $text . $this->_escape_char ;
     }
 
@@ -254,7 +244,7 @@
     * Reset arrays
     *
     */
-    function _reset_select()
+    protected function _reset_select()
     {
       $ar_reset_items = array(
         'ar_select'     => array(),

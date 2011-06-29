@@ -49,14 +49,14 @@
     * Get input data (post or get)
     *
     */
-    public function input($field) 
+    protected function input($field) 
     {
       if(isset($_POST['sEcho']) && isset($_POST[$field]))
         return mysql_real_escape_string($_POST[$field]);
       elseif(isset($_GET['sEcho']) && isset($_GET[$field]))
         return mysql_real_escape_string($_GET[$field]);
       else
-        return FALSE ;
+        return FALSE;
     }
 
     /**

@@ -4,12 +4,18 @@
   *
   * This is a wrapper class/library for Datatables (table plug-in for Jquery)
   *
-  * @subpackage libraries
-  * @category   library
   * @version    0.5.3 ( Vanilla PHP Version )
   * @author     Vincent Bambico <metal.conspiracy@gmail.com>
   *             Yusuf Ozdemir <yusuf@ozdemir.be>
-  * @link       http://codeigniter.com/forums/viewthread/160896/
+  *
+  * Standalone Php Library:
+  * @Fork     : https://github.com/n1crack/IgnitedDatatables-native-php-version
+  * @Discuss  : http://datatables.net/forums/discussion/5133/ignited-datatables-native-php-version
+  * 
+  * Codeigniter Library:
+  * @Fork     : https://github.com/IgnitedDatatables/Ignited-Datatables
+  * @Discuss  : http://codeigniter.com/forums/viewthread/160896/
+  * 
   */
   class Datatables
   {
@@ -32,7 +38,7 @@
     */
     public function __construct($driver = 'mysql') 
     {
-      include('ActiveRecords/'. $driver .'.php');
+      require( dirname(__FILE__) . '/ActiveRecords/' . $driver . '.php' );
       $this->ar = new ActiveRecords;
     }
 
@@ -64,7 +70,7 @@
     *
     * @param string $columns
     * @param bool $backtick_protect
-    * @return object
+    * @return mixed
     */
     public function select($columns, $backtick_protect = TRUE)
     {
@@ -83,7 +89,7 @@
     * Generates the FROM portion of the query
     *
     * @param string $table
-    * @return string
+    * @return mixed
     */
     public function from($table)
     {
@@ -102,7 +108,7 @@
     */
     public function join($table, $fk, $type = NULL)
     {
-      $this->joins[] = array($table, $fk , $type);
+      $this->joins[] = array($table, $fk, $type);
       $this->ar->join($table, $fk, $type);
       return $this;
     }
@@ -113,7 +119,7 @@
     * @param mixed $key_condition
     * @param string $val
     * @param bool $backtick_protect
-    * @return string
+    * @return mixed
     */
     public function where($key_condition, $val = NULL, $backtick_protect = TRUE)
     {
@@ -158,7 +164,7 @@
     * Unset column
     *
     * @param string $column
-    * @return object
+    * @return mixed
     */
     public function unset_column($column)
     {
@@ -207,7 +213,7 @@
 
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
       for($i = 0; $i < intval($this->input('iSortingCols')); $i++)
-        if(isset($sColArray[intval($this->input('iSortCol_' . $i))]) && in_array($sColArray[intval($this->input('iSortCol_' . $i))], $columns ))
+        if(isset($sColArray[intval($this->input('iSortCol_' . $i))]) && in_array($sColArray[intval($this->input('iSortCol_' . $i))], $columns ) && $this->input('bSortable_'.intval($this->input('iSortCol_' . $i))) == 'true' )
           $this->ar->order_by($sColArray[intval($this->input('iSortCol_' . $i))], $this->input('sSortDir_' . $i));
     }
 
@@ -262,7 +268,7 @@
       $iTotal = $this->get_total_results();
       $iFilteredTotal = $this->get_total_results(TRUE);
 
-      foreach($rResult as $row_key => $row_val)
+      foreach($rResult->result() as $row_key => $row_val)
       {
         foreach($row_val as $field => $val)
           if ($this->check_mDataprop())
@@ -278,11 +284,11 @@
 
         foreach($this->edit_columns as $modkey => $modval)
           foreach($modval as $val)
-            $aaData[$row_key][($this->check_mDataprop())?$modkey:array_search($modkey, $this->columns)] = $this->exec_replace($val, $aaData[$row_key]);
+            $aaData[$row_key][($this->check_mDataprop())? $modkey : array_search($modkey, $this->columns)] = $this->exec_replace($val, $aaData[$row_key]);
 
         foreach($this->unset_columns as $column)
           if (in_array($column, $this->columns))
-            unset($aaData[$row_key][($this->check_mDataprop())?$column:array_search($column, $this->columns)]);
+            unset($aaData[$row_key][($this->check_mDataprop())? $column : array_search($column, $this->columns)]);
 
         if (!$this->check_mDataprop())
           $aaData[$row_key] = array_values($aaData[$row_key]);
@@ -374,9 +380,11 @@
     protected function check_mDataprop()
     {
       if ($this->input('mDataProp_0') === false) return FALSE;
+
       for($i = 0; $i < intval($this->input('iColumns')); $i++)
         if(!is_numeric($this->input('mDataProp_' . $i)))
           return TRUE;
+
       return FALSE;
     }
 
@@ -388,8 +396,10 @@
     protected function get_mDataprop()
     {
       $mDataProp = array();
+
       for($i = 0; $i < intval($this->input('iColumns')); $i++)
         $mDataProp[] = $this->input('mDataProp_' . $i);
+
       return $mDataProp;
     }
     /**
@@ -400,7 +410,8 @@
     * @param string $close
     * @return string $retval
     */
-    protected function balanceChars($str, $open, $close) {
+    protected function balanceChars($str, $open, $close)
+    {
       $openCount = substr_count($str, $open);
       $closeCount = substr_count($str, $close);
       $retval = $openCount - $closeCount;
@@ -416,23 +427,28 @@
     * @param string $close
     * @return mixed $retval
     */
-    protected function explode($delimiter, $str, $open='(', $close=')') {
+    protected function explode($delimiter, $str, $open='(', $close=')') 
+    {
       $retval = array();
       $hold = array();
       $balance = 0;
       $parts = explode($delimiter, $str);
-      foreach ($parts as $part) {
+
+      foreach ($parts as $part) 
+      {
         $hold[] = $part;
         $balance += $this->balanceChars($part, $open, $close);
-        if ($balance < 1) {
+        if ($balance < 1)
+        {
           $retval[] = implode($delimiter, $hold);
           $hold = array();
           $balance = 0;
         }
       }
-      if (count($hold) > 0) {
+
+      if (count($hold) > 0)
         $retval[] = implode($delimiter, $hold);
-      }
+
       return $retval;
     }
 

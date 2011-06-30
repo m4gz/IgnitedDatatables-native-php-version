@@ -31,6 +31,7 @@
     var $hostname       = 'localhost';
     var $port           = '';
     var $db ;
+    var $_result;
 
     /**
     * Construct function
@@ -57,7 +58,7 @@
     }
 
     /**
-    * SELECT
+    * Generates the SELECT portion of the query
     *
     */
     public function select($columns, $backtick_protect = TRUE)
@@ -68,7 +69,7 @@
     }
 
     /**
-    * FROM
+    * Generates the FROM portion of the query
     *
     */
     public function from($from)
@@ -80,7 +81,7 @@
     }
 
     /**
-    * JOIN
+    * Generates the JOIN portion of the query
     *
     */
     public function join($table, $cond, $type = '')
@@ -96,7 +97,7 @@
     }
 
     /**
-    * WHERE
+    * Generates the WHERE portion of the query
     *
     */
     public function where($key, $value = NULL, $escape = TRUE, $type = 'AND ')
@@ -113,7 +114,7 @@
     }
 
     /**
-    * LIMIT
+    * Generates the LIMIT portion of the query
     *
     */
     public function limit($value, $offset = '')
@@ -125,7 +126,7 @@
     }
 
     /**
-    * ORDERBY
+    * Generates the ORDER BY portion of the query
     *
     */
     public function order_by($orderby, $direction = '')
@@ -136,15 +137,37 @@
     }
 
     /**
-    * Run Query
+    * Runs the Query
     *
     */
     public function get()
     {
-      $aData = array();
       $result = mysqli_query($this->db, $this->_compile_select()) or die(mysqli_error($this->db));
       $this->_reset_select();
-      while ( $aRow = mysqli_fetch_row($result) )
+      $this->_result = $result;
+      return $this;
+    }
+
+    /**
+    * Results as object
+    *
+    */
+    public function result()
+    {
+      $aData = array();
+      while ($aRow = mysqli_fetch_object($this->_result))
+        $aData[] = $aRow;
+      return $aData;
+    }
+
+    /**
+    * Results as array
+    *
+    */
+    public function result_array()
+    {
+      $aData = array();
+      while ($aRow = mysqli_fetch_array($this->_result, MYSQL_ASSOC))
         $aData[] = $aRow;
       return $aData;
     }
@@ -199,7 +222,8 @@
     * Protect identifiers
     *
     */
-    protected function _protect_identifiers($text) {
+    protected function _protect_identifiers($text)
+    {
       $_escape_char   = '`';
       $_replace = '';
       $_replace2 = '';
@@ -236,7 +260,8 @@
     * Escape
     *
     */
-    protected function _escape($text) {
+    protected function _escape($text)
+    {
       return $this->_escape_char . $text . $this->_escape_char ;
     }
 

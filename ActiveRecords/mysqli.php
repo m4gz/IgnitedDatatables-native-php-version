@@ -42,6 +42,7 @@
       foreach ($config as $key => $val)
         if(in_array($key, array('hostname', 'username', 'password', 'database', 'port')))
           $this->$key = $val;
+
       $this->db_connect();
     }
 
@@ -65,6 +66,7 @@
     {
       foreach ($columns as $column)
         $this->ar_select[] = ($backtick_protect == TRUE)? $this->_protect_identifiers(trim($column)) : trim($column);
+
       return $this;
     }
 
@@ -75,8 +77,10 @@
     public function from($from)
     {
       $from = explode(',', $from);
+
       foreach ((array)$from as $f)
         $this->ar_from[] = $this->_protect_identifiers(trim($f));
+
       return $this;    
     }
 
@@ -91,8 +95,10 @@
         $type = strtoupper(trim($type));
         $type = (!in_array($type, array('LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER')))? '':$type.' ' ;
       }
+
       $join = $type.'JOIN '.$this->_protect_identifiers($table).' ON '.$this->_protect_identifiers($cond);
       $this->ar_join[] = $join;
+
       return $this;
     }
 
@@ -103,6 +109,7 @@
     public function where($key, $value = NULL, $escape = TRUE, $type = 'AND ')
     {
       $prefix = (count($this->ar_where) == 0)? '' : $type;
+
       if($value != NULL) 
       {
         $key = ($this->_has_operator($key) == TRUE)? $key : $key.' ='; 
@@ -110,6 +117,7 @@
       }
 
       $this->ar_where[] = $prefix.(($escape == TRUE)? $this->_protect_identifiers($key.$value) : $key.$value);
+
       return $this;
     }
 
@@ -120,8 +128,10 @@
     public function limit($value, $offset = '')
     {
       $this->ar_limit = $value;
+
       if ($offset != '')
         $this->ar_offset = $offset;
+
       return $this;
     }
 
@@ -133,6 +143,7 @@
     {
       $direction = (in_array(strtoupper(trim($direction)), array('ASC', 'DESC'), TRUE))? ' '.$direction : ' ASC';
       $this->ar_orderby[] = $orderby.$direction;
+
       return $this;
     }
 
@@ -145,6 +156,7 @@
       $result = mysqli_query($this->db, $this->_compile_select()) or die(mysqli_error($this->db));
       $this->_reset_select();
       $this->_result = $result;
+
       return $this;
     }
 
@@ -155,8 +167,10 @@
     public function result()
     {
       $aData = array();
+
       while ($aRow = mysqli_fetch_object($this->_result))
         $aData[] = $aRow;
+
       return $aData;
     }
 
@@ -167,8 +181,10 @@
     public function result_array()
     {
       $aData = array();
+
       while ($aRow = mysqli_fetch_array($this->_result, MYSQL_ASSOC))
         $aData[] = $aRow;
+
       return $aData;
     }
 
@@ -180,10 +196,12 @@
     {    
       if ($table != '')
         $this->from($table);
+
       $sql = $this->_compile_select($this->_count_string . 'numrows');
       $query = mysqli_query($this->db, $sql) or die(mysqli_error($this->db));
       $this->_reset_select();
       $row = $query->fetch_object();
+
       return (int) $row->numrows;
     }
 
@@ -224,7 +242,6 @@
     */
     protected function _protect_identifiers($text)
     {
-      $_escape_char   = '`';
       $_replace = '';
       $_replace2 = '';
       $_pattern = '/\b(?<!\"|\')(\w+)(?<!\"|\')[\=]?\b/i';
@@ -244,6 +261,7 @@
         $_replace = $text;
         $_replace2 = '';
       }
+
       return preg_replace($_pattern , $this->_escape('$1'), $_replace).$_replace2;
     }
 
@@ -281,6 +299,7 @@
         'ar_offset'     => FALSE,
         'ar_order'      => FALSE    
        );
+
       foreach ($ar_reset_items as $item => $default_value)
         $this->$item = $default_value;
     }

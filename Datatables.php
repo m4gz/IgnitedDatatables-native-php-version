@@ -81,7 +81,6 @@
         $this->select[$column] =  trim(preg_replace('/(.*)\s+as\s+(\w*)/i', '$1', $val));
       }
       $this->ar->select($this->explode(',', $columns), $backtick_protect);
-      
       return $this;
     }
 
@@ -224,16 +223,16 @@
     */
     protected function get_filtering()
     {
-      $sWhere = '';
-      $sSearch = $this->input('sSearch');
-      $columns = array_values(array_diff($this->columns, $this->unset_columns));
-
       if ($this->check_mDataprop())
         $sColArray = $this->get_mDataprop();
       elseif ($this->input('sColumns'))
         $sColArray = explode(',', $this->input('sColumns'));
       else
         $sColArray = $this->columns;
+
+      $sWhere = '';
+      $sSearch = $this->input('sSearch');
+      $columns = array_values(array_diff($this->columns, $this->unset_columns));
 
       if($sSearch != '')
         for($i = 0; $i < count($sColArray); $i++)
@@ -271,26 +270,26 @@
       foreach($rResult->result() as $row_key => $row_val)
       {
         foreach($row_val as $field => $val)
-          if ($this->check_mDataprop())
+          if($this->check_mDataprop())
             $aaData[$row_key][$field] = $val;
           else
             $aaData[$row_key][] = $val;
 
-        foreach($this->add_columns as $add_val)
-          if ($this->check_mDataprop())
-            $aaData[$row_key][$field] = $this->exec_replace($add_val, $aaData[$row_key]);
+        foreach($this->add_columns as $field => $val)
+          if($this->check_mDataprop())
+            $aaData[$row_key][$field] = $this->exec_replace($val, $aaData[$row_key]);
           else
-            $aaData[$row_key][] = $this->exec_replace($add_val, $aaData[$row_key]);
+            $aaData[$row_key][] = $this->exec_replace($val, $aaData[$row_key]);
 
         foreach($this->edit_columns as $modkey => $modval)
           foreach($modval as $val)
             $aaData[$row_key][($this->check_mDataprop())? $modkey : array_search($modkey, $this->columns)] = $this->exec_replace($val, $aaData[$row_key]);
 
         foreach($this->unset_columns as $column)
-          if (in_array($column, $this->columns))
+          if(in_array($column, $this->columns))
             unset($aaData[$row_key][($this->check_mDataprop())? $column : array_search($column, $this->columns)]);
 
-        if (!$this->check_mDataprop())
+        if(!$this->check_mDataprop())
           $aaData[$row_key] = array_values($aaData[$row_key]);
       }
 
@@ -356,12 +355,12 @@
 
             foreach($args as $args_key => $args_val)
               if(in_array($args_val, $this->columns))
-                $args[$args_key] = $row_data[($this->check_mDataprop())?$args_val:array_search($args_val, $this->columns)];
+                $args[$args_key] = $row_data[($this->check_mDataprop())? $args_val : array_search($args_val, $this->columns)];
 
             $replace_string = call_user_func_array($func, $args);
           }
           elseif(in_array($val, $this->columns))
-            $replace_string = $row_data[($this->check_mDataprop())? $val:array_search($val, $this->columns)];
+            $replace_string = $row_data[($this->check_mDataprop())? $val : array_search($val, $this->columns)];
           else
             $replace_string = $val;
 
@@ -402,6 +401,7 @@
 
       return $mDataProp;
     }
+
     /**
     * Return the difference of open and close characters
     *

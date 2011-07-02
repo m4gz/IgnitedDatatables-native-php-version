@@ -281,18 +281,14 @@
           foreach($modval as $val)
             $aaData[$row_key][($this->check_mDataprop())? $modkey : array_search($modkey, $this->columns)] = $this->exec_replace($val, $aaData[$row_key]);
 
-        foreach($this->unset_columns as $column)
-          if(in_array($column, $this->columns))
-            unset($aaData[$row_key][($this->check_mDataprop())? $column : array_search($column, $this->columns)]);
+        $aaData[$row_key] = array_diff_key($aaData[$row_key], ($this->check_mDataprop())? $this->unset_columns : array_intersect($this->columns, $this->unset_columns));
 
         if(!$this->check_mDataprop())
           $aaData[$row_key] = array_values($aaData[$row_key]);
       }
 
       $sColumns = $this->columns;
-      foreach($this->unset_columns as $column)
-        if(in_array($column, $this->columns))
-          unset($sColumns[array_search($column, $this->columns)]);
+      $sColumns = array_diff($this->columns, $this->unset_columns);
       $sColumns = array_merge_recursive($sColumns, array_keys($this->add_columns));
 
       $sOutput = array

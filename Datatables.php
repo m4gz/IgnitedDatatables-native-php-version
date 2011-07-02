@@ -93,7 +93,7 @@
     public function from($table)
     {
       $this->table = $table;
-      $this->ar->from($table);
+      $this->ar->from($this->explode(',', $table));
       return $this;
     }
 
@@ -210,7 +210,9 @@
       else
         $sColArray = $this->columns;
 
+      $sColArray = array_values(array_diff($sColArray, $this->unset_columns));
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
+
       for($i = 0; $i < intval($this->input('iSortingCols')); $i++)
         if(isset($sColArray[intval($this->input('iSortCol_' . $i))]) && in_array($sColArray[intval($this->input('iSortCol_' . $i))], $columns ) && $this->input('bSortable_'.intval($this->input('iSortCol_' . $i))) == 'true' )
           $this->ar->order_by($sColArray[intval($this->input('iSortCol_' . $i))], $this->input('sSortDir_' . $i));
@@ -232,6 +234,7 @@
 
       $sWhere = '';
       $sSearch = $this->input('sSearch');
+
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
 
       if($sSearch != '')

@@ -15,10 +15,7 @@ $(document).ready(function()
   {
     $('#example').dataTable
     ({
-      "bProcessing": true,
       'bServerSide'    : true,
-      'bAutoWidth'     : false,
-      'sPaginationType': 'full_numbers',
       'sAjaxSource'    : 'ajax.php'
     });
   });
@@ -26,14 +23,15 @@ $(document).ready(function()
 </head>
 <body id="dt_example">
 <div id="container">
+<h1>Ignited Datatables - Basic Init</h1>
   <table border="0" cellpadding="4" cellspacing="0" class="display" id="example">
     <thead>
       <tr>
         <th width="10%">Film ID</th>
-        <th width="20%">Title</th>
-        <th width="45%">Description</th>
-        <th width="10%">Year</th>
-        <th width="15%">Category</th>
+        <th width="55%">Title</th>
+        <th width="10%">Release Year</th>
+        <th width="10%">Length</th>
+        <th width="15%">Rating</th>
       </tr>
     </thead>
     <tbody>

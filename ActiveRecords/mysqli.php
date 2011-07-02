@@ -76,8 +76,6 @@
     */
     public function from($from)
     {
-      $from = explode(',', $from);
-
       foreach ((array)$from as $f)
         $this->ar_from[] = $this->_protect_identifiers(trim($f));
 
@@ -245,7 +243,6 @@
       $_replace = '';
       $_replace2 = '';
       $_pattern = '/\b(?<!\"|\')(\w+)(?<!\"|\')[\=]?\b/i';
-      $text = str_replace('=', ' = ', $text);
       $text = preg_replace('/\s\s+/', ' ', $text);
 
       if(strpos($text, '(') !== false) 

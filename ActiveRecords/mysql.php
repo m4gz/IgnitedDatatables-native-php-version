@@ -117,17 +117,22 @@
     */
     public function where($key, $value = NULL, $escape = TRUE, $type = 'AND ')
     {
-      $prefix = (count($this->ar_where) == 0)? '' : $type;
-
-      if($value != NULL) 
+      if ( ! is_array($key))
+        $key = array($key => $value);
+		
+      foreach ($key as $k => $v)
       {
-        $key = ($this->_has_operator($key) == TRUE)? $key : $key.' ='; 
-        $value = ($escape == TRUE)? "'".$value."'" : $value;  
+        $prefix = (count($this->ar_where) == 0)? '' : $type;
+
+        if($v != NULL) 
+        {
+          $k = ($this->_has_operator($k) == TRUE)? $k : $k . ' ='; 
+          $v = ($escape == TRUE)? " '" . $v . "'" : $v;  
+        }
+
+        $this->ar_where[] = $prefix . (($escape == TRUE)? $this->_protect_identifiers($k.$v) : $k.$v);
       }
-
-      $this->ar_where[] = $prefix.(($escape == TRUE)? $this->_protect_identifiers($key.$value) : $key.$value);
-
-      return $this;
+      return $this;  
     }
 
     /**
@@ -251,26 +256,20 @@
     */
     protected function _protect_identifiers($text)
     {
-      $_replace = '';
-      $_replace2 = '';
-      $_pattern = '/\b(?<!\"|\')(\w+)(?<!\"|\')[\=]?\b/i';
-      $text = preg_replace('/\s\s+/', ' ', $text);
+      $_pattern = '/\b(?<!"|\')(\w+)(?!\\1)\b/i';
+      $item = preg_replace('/[\t ]+/', ' ', $text);
+      $alias = '';
 
-      if(strpos($text, '(') !== false) 
-        return $text;
-
-      if(strpos($text, ' as ') !== false ) 
+      if (strpos($item, ' ') !== FALSE)
       {
-        $_replace = substr(strrev(strstr(strrev($text), strrev(' as '))), 0, -strlen(' as '));
-        $_replace2 = strstr( $text,' as ');
-      }
-      else
-      {
-        $_replace = $text;
-        $_replace2 = '';
+        $alias = strstr($item, " ");
+        $item = substr($item, 0, - strlen($alias));
       }
 
-      return preg_replace($_pattern , $this->_escape('$1'), $_replace).$_replace2;
+      if (strpos($item, '(') !== FALSE)
+        return $item.$alias;
+
+      return preg_replace($_pattern, $this->_escape('$1'), $item).$alias;
     }
 
     /**

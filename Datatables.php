@@ -137,8 +137,7 @@
     */
     public function add_column($column, $content, $match_replacement = NULL)
     {
-      $match_replacement = $this->explode(',', $match_replacement);
-      $this->add_columns[$column] = array('content' => $content, 'replacement' => $match_replacement);
+      $this->add_columns[$column] = array('content' => $content, 'replacement' => $this->explode(',', $match_replacement));
       return $this;
     }
 
@@ -152,8 +151,7 @@
     */
     public function edit_column($column, $content, $match_replacement)
     {
-      $match_replacement = $this->explode(',', $match_replacement);
-      $this->edit_columns[$column][] = array('content' => $content, 'replacement' => $match_replacement);
+      $this->edit_columns[$column][] = array('content' => $content, 'replacement' => $this->explode(',', $match_replacement));
       return $this;
     }
 
@@ -337,7 +335,7 @@
       {
         foreach($custom_val['replacement'] as $key => $val)
         {
-          $val = preg_replace("/(?<!\w)([\'\"])(.*)\\1(?!\w)/i", '$2', trim($val));
+          $sval = preg_replace("/(?<!\w)([\'\"])(.*)\\1(?!\w)/i", '$2', trim($val));
           if(preg_match('/callback\_(\w+)\((.+)\)/i', $val, $matches))
           {
             $func = $matches[1];
@@ -351,10 +349,10 @@
 
             $replace_string = call_user_func_array($func, $args);
           }
-          elseif(in_array($val, $this->columns))
-            $replace_string = $row_data[($this->check_mDataprop())? $val : array_search($val, $this->columns)];
+          elseif(in_array($sval, $this->columns))
+            $replace_string = $row_data[($this->check_mDataprop())? $sval : array_search($sval, $this->columns)];
           else
-            $replace_string = $val;
+            $replace_string = $sval;
 
           $custom_val['content'] = str_ireplace('$' . ($key + 1), $replace_string, $custom_val['content']);
         }

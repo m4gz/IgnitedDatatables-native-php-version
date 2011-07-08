@@ -46,7 +46,7 @@ $(document).ready(function()
 			$( "#max_length" ).val(ui.values[ 1 ]);
 		},
 		stop: function(event, ui) { 
-			oTable.fnDeleteRow();
+			oTable.fnDraw();
 		}
 	});
 	$( "#min_length" ).val( $( "#slider-range" ).slider( "values", 0 ));

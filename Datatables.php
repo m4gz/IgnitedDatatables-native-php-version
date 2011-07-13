@@ -231,6 +231,7 @@
       $sWhere = '';
       $sSearch = $this->input('sSearch');
 
+      $mColArray = array_values(array_diff($mColArray, $this->unset_columns));
       $columns = array_values(array_diff($this->columns, $this->unset_columns));
 
       if($sSearch != '')
@@ -242,6 +243,10 @@
 
       if($sWhere != '')
         $this->ar->where('(' . $sWhere . ')');
+
+      for($i = 0; $i < intval($this->input('iColumns')); $i++) 
+	    if($this->input('sSearch_' . $i) && $this->input('sSearch_' . $i) != '' && in_array($mColArray[$i], $columns))
+		  $this->ar->where($this->select[$mColArray[$i]].' like', '%'.$this->input('sSearch_' . $i).'%');
     }
 
     /**

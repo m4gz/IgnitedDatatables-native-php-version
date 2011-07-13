@@ -28,6 +28,7 @@
     var $columns        = array();
     var $joins          = array();
     var $where          = array();
+    var $filter         = array();
     var $add_columns    = array();
     var $edit_columns   = array();
     var $unset_columns  = array();
@@ -124,6 +125,21 @@
     {
       $this->where[] = array($key_condition, $val, $backtick_protect);
       $this->ar->where($key_condition, $val, $backtick_protect);
+      return $this;
+    }
+
+
+    /**
+    * Generates the WHERE portion of the query
+    *
+    * @param mixed $key_condition
+    * @param string $val
+    * @param bool $backtick_protect
+    * @return mixed
+    */
+    public function filter($key_condition, $val = NULL, $backtick_protect = TRUE)
+    {
+      $this->filter[] = array($key_condition, $val, $backtick_protect);
       return $this;
     }
 
@@ -247,6 +263,9 @@
       for($i = 0; $i < intval($this->input('iColumns')); $i++) 
 	    if($this->input('sSearch_' . $i) && $this->input('sSearch_' . $i) != '' && in_array($mColArray[$i], $columns))
 		  $this->ar->where($this->select[$mColArray[$i]].' like', '%'.$this->input('sSearch_' . $i).'%');
+
+      foreach($this->filter as $val)
+        $this->ar->where($val[0], $val[1], $val[2]);
     }
 
     /**

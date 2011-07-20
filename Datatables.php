@@ -4,7 +4,7 @@
   *
   * This is a wrapper class/library for Datatables (table plug-in for Jquery)
   *
-  * @version    0.5.3 ( Vanilla PHP Version )
+  * @version    0.5.4 ( Standalone Php Library )
   * @author     Vincent Bambico <metal.conspiracy@gmail.com>
   *             Yusuf Ozdemir <yusuf@ozdemir.be>
   *
@@ -56,12 +56,12 @@
     * Get input data (post or get)
     *
     */
-    protected function input($field) 
+    protected function input($field, $escape = TRUE)
     {
       if(isset($_POST['sEcho']) && isset($_POST[$field]))
-        return mysql_real_escape_string($_POST[$field]);
+        return ($escape == TRUE)? mysql_real_escape_string($_POST[$field]) : $_POST[$field];
       elseif(isset($_GET['sEcho']) && isset($_GET[$field]))
-        return mysql_real_escape_string($_GET[$field]);
+        return ($escape == TRUE)? mysql_real_escape_string($_GET[$field]) : $_GET[$field];
       else
         return FALSE;
     }
@@ -261,8 +261,8 @@
         $this->ar->where('(' . $sWhere . ')');
 
       for($i = 0; $i < intval($this->input('iColumns')); $i++) 
-	    if($this->input('sSearch_' . $i) && $this->input('sSearch_' . $i) != '' && in_array($mColArray[$i], $columns))
-		  $this->ar->where($this->select[$mColArray[$i]].' like', '%'.$this->input('sSearch_' . $i).'%');
+        if($this->input('sSearch_' . $i) && $this->input('sSearch_' . $i) != '' && in_array($mColArray[$i], $columns))
+          $this->ar->where($this->select[$mColArray[$i]].' LIKE', '%'.$this->input('sSearch_' . $i).'%');
 
       foreach($this->filter as $val)
         $this->ar->where($val[0], $val[1], $val[2]);
@@ -360,10 +360,10 @@
         foreach($custom_val['replacement'] as $key => $val)
         {
           $sval = preg_replace("/(?<!\w)([\'\"])(.*)\\1(?!\w)/i", '$2', trim($val));
-          if(preg_match('/callback\_(\w+)\((.+)\)/i', $val, $matches))
+          if(preg_match('/(\w+)\((.*)\)/i', $val, $matches) && function_exists($matches[1]))
           {
             $func = $matches[1];
-            $args = $this->explode(',', $matches[2]);
+            $args = preg_split("/[\s,]*\\\"([^\\\"]+)\\\"[\s,]*|" . "[\s,]*'([^']+)'[\s,]*|" . "[,]+/", $matches[2], 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
             foreach($args as $args_key => $args_val)
             {

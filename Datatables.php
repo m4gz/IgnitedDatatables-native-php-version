@@ -186,14 +186,15 @@
     /**
     * Builds all the necessary query segments and performs the main query based on results set from chained statements
     *
+    * @param string charset
     * @return string
     */
-    public function generate()
+    public function generate($charset = 'UTF-8')
     {
       $this->get_paging();
       $this->get_ordering();
       $this->get_filtering();
-      return $this->produce_output();
+      return $this->produce_output($charset);
     }
 
     /**
@@ -281,9 +282,10 @@
     /**
     * Builds a JSON encoded string data
     *
+    * @param string charset
     * @return string
     */
-    protected function produce_output()
+    protected function produce_output($charset)
     {
       $aaData = array();
       $rResult = $this->get_display_result();
@@ -322,7 +324,10 @@
         'sColumns'             => implode(',', $sColumns)
       );
 
-      return json_encode($sOutput);
+      if(strtolower($charset) == 'utf-8')
+        return json_encode($sOutput);
+      else
+        return $this->jsonify($sOutput);
     }
 
     /**
@@ -465,6 +470,55 @@
 
       return $retval;
     }
+    /**
+    * Workaround for json_encode's UTF-8 encoding if a different charset needs to be used
+    *
+    * @param mixed result
+    * @return string
+    */
+    protected function jsonify($result = FALSE)
+    {
+      if(is_null($result)) return 'null';
+      if($result === FALSE) return 'false';
+      if($result === TRUE) return 'true';
 
+      if(is_scalar($result))
+      {
+        if(is_float($result))
+          return floatval(str_replace(',', '.', strval($result)));
+
+        if(is_string($result))
+        {
+          static $jsonReplaces = array(array('\\', '/', '\n', '\t', '\r', '\b', '\f', '"'), array('\\\\', '\\/', '\\n', '\\t', '\\r', '\\b', '\\f', '\"'));
+          return '"' . str_replace($jsonReplaces[0], $jsonReplaces[1], $result) . '"';
+        }
+        else
+          return $result;
+      }
+
+      $isList = TRUE;
+
+      for($i = 0, reset($result); $i < count($result); $i++, next($result))
+      {
+        if(key($result) !== $i)
+        {
+          $isList = FALSE;
+          break;
+        }
+      }
+
+      $json = array();
+
+      if($isList)
+      {
+        foreach($result as $value) $json[] = $this->jsonify($value);
+        return '[' . join(',', $json) . ']';
+      }
+      else
+      {
+        foreach($result as $key => $value) $json[] = $this->jsonify($key) . ':' . $this->jsonify($value);
+        return '{' . join(',', $json) . '}';
+      }
+    }
   }
 /* End of file Datatables.php */

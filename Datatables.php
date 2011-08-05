@@ -186,14 +186,15 @@
     /**
     * Builds all the necessary query segments and performs the main query based on results set from chained statements
     *
+    * @param string charset
     * @return string
     */
-    public function generate()
+    public function generate($charset = 'UTF-8')
     {
       $this->get_paging();
       $this->get_ordering();
       $this->get_filtering();
-      return $this->produce_output();
+      return $this->produce_output($charset);
     }
 
     /**
@@ -260,9 +261,20 @@
       if($sWhere != '')
         $this->ar->where('(' . $sWhere . ')');
 
-      for($i = 0; $i < intval($this->input('iColumns')); $i++) 
+      for($i = 0; $i < intval($this->input('iColumns')); $i++)
+      {
         if($this->input('sSearch_' . $i) && $this->input('sSearch_' . $i) != '' && in_array($mColArray[$i], $columns))
-          $this->ar->where($this->select[$mColArray[$i]].' LIKE', '%'.$this->input('sSearch_' . $i).'%');
+        {
+          $miSearch = explode(',', $this->input('sSearch_' . $i));
+          foreach($miSearch as $val)
+          {
+            if(preg_match("/(<=|>=|=|<|>)(\s*)(.+)/i", trim($val), $matches))
+              $this->ar->where($this->select[$mColArray[$i]].' '.$matches[1], $matches[3]);
+            else
+              $this->ar->where($this->select[$mColArray[$i]].' LIKE', '%'.$val.'%');
+          }
+        }
+      }
 
       foreach($this->filter as $val)
         $this->ar->where($val[0], $val[1], $val[2]);
@@ -281,9 +293,10 @@
     /**
     * Builds a JSON encoded string data
     *
+    * @param string charset
     * @return string
     */
-    protected function produce_output()
+    protected function produce_output($charset)
     {
       $aaData = array();
       $rResult = $this->get_display_result();
@@ -322,7 +335,10 @@
         'sColumns'             => implode(',', $sColumns)
       );
 
-      return $this->jsonify($sOutput);
+      if(strtolower($charset) == 'utf-8')
+        return json_encode($sOutput);
+      else
+        return $this->jsonify($sOutput);
     }
 
     /**
